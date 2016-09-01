@@ -1,4 +1,7 @@
-// Joshua Lilly, G00
+// Joshua Lilly
+// CS 367
+// Homework 1
+// 8/30/2016
 
 #include <stdio.h>
 #include <stdlib.h>

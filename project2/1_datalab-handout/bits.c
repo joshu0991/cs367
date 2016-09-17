@@ -144,17 +144,41 @@ NOTES:
  */
 unsigned float_abs(unsigned uf) 
 {
-  int sign = uf / 0x80000000; 
-  int r;
-  r = uf % 0x80000000;  
-  if (r / 2139095040)
+  /*
+   * Extracts the sign bit and negates and flips the sign
+   * bit if the sign bit extracted is 1 otherwise does nothing
+   * in the case we have a nan or infinity representation we check
+   * to see if the NAN and if it is we just return otherwise if
+   * it's infinity we just resume the normal flipping or not of the upper
+   * most bit.
+   */
+  // extract the sign bit by dividing by
+  // the smallest unsigned value.
+  int signBit = uf / 0x80000000;
+ 
+  // we need the orig. number around still
+  // so we can't mutate it. But we need to 
+  // get rid of the sign bit on this numebr so
+  // we can do modular arithmatic when checking for
+  // NAN and infinity.
+  int temp;
+  temp = uf % 0x80000000; 
+ 
+  // if the integer arithmatic with the NAN value 
+  // is greater than one.
+  if (temp / 0x7F800000)
   {
-    int a = r % 213909504;
-    if (a)
+    // then check to see if this is nan or infinity.
+    // if nan just return otherwise just fall through 
+    // and resume normal absolute value
+    int nan = temp % 0x7F800000;
+    if (nan)
       return uf;
   }
-   
-  if (uf != 0 && sign)
+ 
+  // if the value isn't zero or positive then
+  // flip the sign bit.  
+  if (uf != 0 && signBit)
   { 
     uf += 0x80000000;
   }
@@ -179,6 +203,10 @@ int addOK(int x, int y)
    * entered and different for the sum, overflow has occured. This is checked by packing 
    * the sign bits into an integer and checking to see if it is 6 or 1, which is the only
    * case where this is the case for addition... And all in 18 operations! 
+   *
+   * Edit: Just found the page in the text book that details how to do this. I am going
+   * to leave this implimentation for origionality....
+   *
    */ 
   int sign1 = 0, sign2 = 0, c = 0, sign3 = 0, temp = 0, p = 0, q = 0;
   sign1 = (x >> 31) & 1;
@@ -187,6 +215,7 @@ int addOK(int x, int y)
   c = x + y;
   sign3 = (c >> 31) & 1;
 
+  // pack the signs in an integer
   temp = 0;
   temp |= sign1;
   temp <<= 1;
@@ -194,6 +223,8 @@ int addOK(int x, int y)
   temp <<= 1;
   temp |= sign3;
 
+  // if the signs packed this way are 1 or six
+  // we overflowed...
   p = !(temp ^ 0x06);
   q = !(temp ^ 0x01);
 
@@ -214,11 +245,13 @@ int allEvenBits(int x)
   *  made if the value did have all even bits set then anding it with 1 will return 1
   *  otherwise anding it with 1 will yield 0.
   */
-  x = x & (x >> 16);
+  // where can we find a number with all of the even bits set (if they are in fact set)?
+  // The upper bits of this number will have all the even bits set if they are!
+  x = x & (x >> 16); // are all the even bits set?
   x = x & (x >> 8);
   x = x & (x >> 4);
   x = x & (x >> 2);
-  x = x & 1;
+  x = x & 1; // was all the even bits set?
   return x;  
 }
 /* 

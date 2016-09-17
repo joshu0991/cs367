@@ -179,9 +179,7 @@ unsigned float_abs(unsigned uf)
   // if the value isn't zero or positive then
   // flip the sign bit.  
   if (uf != 0 && signBit)
-  { 
     uf += 0x80000000;
-  }
  
   return uf;
 }

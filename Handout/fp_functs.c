@@ -3,6 +3,15 @@
 #include <math.h>
 #include "fp.h"
 
+typedef union {
+  float v;
+  struct {
+    unsigned fraction : 23;
+    unsigned exp : 8;
+    unsigned sign : 1;
+  } p;
+} float_to_parts;
+
 
 int
 computeFP(float val) {
@@ -20,10 +29,29 @@ computeFP(float val) {
 //       stored is > 14
 //    for overflow (E > 14), return -1
 //    For underflow (E < 1), return 0 
+  
+  // extract the exponent.
+  // int exponent = val & 0x7F800000;
+  // exponent >>= 23; 
+  //int 
+  float_to_parts floatParts;
+  floatParts.v = val;
+  
+  //bias for 32 bit is 2^k-1 -1 = 127
+  // e = exp - bias 
+  int e = floatParts.p.exp - 127;
 
+  // new biased exponent is to 5 bias = 15
+  int new_exp = e - 15;
   
-  
-  return 2;
+  int retVal = 0;
+
+  // pack in the new exponent.
+  retVal |= new_exp;
+  retVal <<= 23;
+  // pack in the fraction portion.
+  retVal |= floatParts.p.fraction;
+  return retVal;
 }
 
 float getFP(int val) {
@@ -31,8 +59,6 @@ float getFP(int val) {
 //    value
 // For denormalized values (including 0), simply return 0.
 // For special values, return -1;
-
-  
 
  return 2.0;
 }
@@ -66,5 +92,4 @@ addVals(int source1, int source2) {
 // Also, return -1 if the sum overflows
   return 2;
 }
-
 

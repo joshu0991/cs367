@@ -116,11 +116,155 @@ float getFP(int val) {
   return f;
 }
 
+int
+multVals(int source1, int source2) {
+// You must implement this by using the algorithm
+//    described in class:
+//    Add the exponents:  E = E1+E2 
+//    multiply the fractional values: M = M1*M2
+//    if M too large, divide it by 2 and increment E
+//    save the result
+// Be sure to check for overflow - return -1 in this case
+// Be sure to check for underflow - return 0 in this case
+
+  int exponent1 = ((source1 >> 7) & 0x1F);
+  int exponent2 = ((source2 >> 7) & 0x1F);
+
+  int e1 = exponent1 - 15;
+  int e2 = exponent2 - 15;
+  int e3 = e1 + e2;
+
+  if (e3 > 14)
+  {
+    return -1;
+  } 
+
+  if (e3 < 1)
+  {
+    return 0;
+  }
+ 
+  float frac1 = ((float) (source1 & 0x7f));
+  float frac2 = ((float) (source2 & 0x7f));
+
+  frac1 = (frac1 / ((float)pow(2, 7))) + 1;
+  frac2 = (frac2 / ((float)pow(2, 7))) + 1;
+
+  float frac = frac1 * frac2;
+  if (frac >= 2)
+  {
+    frac /= 2;
+    ++e3;
+  }
+
+  if (e3 > 14)
+  {
+    return -1;
+  }
+
+  int new_exp = 15 + e3;
+  frac -= 1;
+  frac *= (float)pow(2, 7);
+
+  int newFrac = (int) frac;
+
+  int retVal = 0;
+  retVal |= new_exp;
+  retVal <<=  7;
+  retVal |= newFrac; 
+  return retVal;;
+}
+
+int
+addVals(int source1, int source2) {
+// Do this function last - it is the most difficult!
+// You must implement this as described in class:
+//     If needed, adjust one of the two number so that 
+//        they have the same exponent E
+//     Add the two fractional parts:  F1' + F2 = F
+//              (assumes F1' is the adjusted F1)
+//     Adjust the sum F and E so that F is in the correct range
+//     
+// As described in the handout, you only need to implement this for
+//    positive, normalized numbers
+// Also, return -1 if the sum overflows
+
+  int exponent1 = ((source1 >> 7) & 0x1F);
+  int exponent2 = ((source2 >> 7) & 0x1F);
+
+  int e1 = exponent1 - 15;
+  int e2 = exponent2 - 15;
+    
+  float frac1 = ((float) (source1 & 0x7f));
+  float frac2 = ((float) (source2 & 0x7f));
+
+  // the fractions with the leading 1
+  frac1 = (frac1 / ((float)pow(2, 7))) + 1;
+  frac2 = (frac2 / ((float)pow(2, 7))) + 1;
+
+  printf("E1 minus E2 %d\n", e1 - e2);
+  
+  if (e1 != e2)
+  {
+    if (e1 - e2 > 0)
+    {
+      printf("****Shifting\n");
+      frac2 = frac2 / (float)pow(2, e1 - e2);
+    }
+    else if (e1 - e2 < 0)
+    {
+      printf("****Shifting\n");
+      frac2 = frac2 / (float)pow(2, e2 - e1);
+    }
+    // we normalize e2
+    e2 = e2 + (e1 - e2);
+  }
+
+  printf("frac1: %f frac2 %f\n", frac1, frac2);
+  float frac = frac2 + frac1;
+
+  printf("frac %f\n", frac);
+//  if (frac > 2)
+//  {
+//    frac /= 2;
+//    ++e1;
+//  printf("frac div  %f\n", frac);
+//  }
+
+  int new_exp = 15 + e1;
+  printf("New exponent %d\n", new_exp);
+  frac -= 1;
+  printf("frac minus 1 %f\n", frac);
+  frac *= (float)pow(2, 7);
+
+  printf("frac times 2^7 %f\n", frac);
+  int newFrac = (int) frac;
+
+  printf("new frac %d\n", newFrac);
+  int retVal = 0;
+  retVal |= new_exp;
+  retVal <<=  7;
+  retVal |= newFrac; 
+  return retVal;
+}
+
 int main()
 {
-  int a = computeFP(4.5);
+  int a = computeFP(18.113);
+  int b = computeFP(4.5);
   printf("%d\n", a);
 
-  float f = getFP(a);
-  printf("%f\n", f);
+  float g = getFP(a);
+  float h = getFP(b);
+  printf("First %f : second %f\n", g, h);
+
+  int mult = multVals(a, b);
+  
+  float f = getFP(mult);
+  printf("Multiplication %f\n", f);
+
+  int add = addVals(a, b);
+  float q = getFP(add);
+  printf("Addition %d\n", add);
+  printf("Addition %f\n", q);
 }

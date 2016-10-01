@@ -20,34 +20,40 @@ computeFP(float val) {
 //    for overflow (E > 14), return -1
 //    For underflow (E < 1), return 0 
 
+
+  // if zero just return here were done.
   if (val == 0)
   {
     return 0;
   }
 
-  float temp = val;
   int e = 0;
   int retVal = 0;
   
-  // calculate the exponent.
+  // calculate the e.
   if (val >= 2)
   {
+    // if the value is greater than two justify
     while (val >= 2)
     {
+      // justify by dividing
       val = val / 2;
       ++e;
     }
   }
   else if (val < 1)
   {
+    // if the val is less than one
     while (val < 1)
     {
+      // justify by multiplication
       val = val * 2;
       ++e;
     }
     e *= -1;
   }
 
+  // we just want the decimal points to store.
   val -= 1;
 
   int biasedExponent = e + 15;
@@ -57,6 +63,7 @@ computeFP(float val) {
   float sevenBits = val * (pow(2, 7));
   mantissa = (int)sevenBits;
 
+  // because biased expnents largest number
   if (biasedExponent > 30)
   {
     return -1;
@@ -67,6 +74,7 @@ computeFP(float val) {
     return 0;
   }
 
+  // pack the number
   retVal |= biasedExponent;
   retVal <<= 7;
   retVal |= mantissa;
@@ -94,14 +102,16 @@ float getFP(int val) {
     return -1;
   }
 
+  // get e
   int e = exponent - 15;
   
+  // check to see if negative
   if (e < 0)
   {
     int i;
     for (i = e; i < 0; ++i)
     {
-      // extract the whole number
+      // normalize
       fraction = fraction / 2;
     }
   }
@@ -139,9 +149,11 @@ multVals(int source1, int source2) {
   float frac1 = ((float) (source1 & 0x7f));
   float frac2 = ((float) (source2 & 0x7f));
 
+  // + one since that is the point to the left
   frac1 = (frac1 / ((float)pow(2, 7))) + 1;
   frac2 = (frac2 / ((float)pow(2, 7))) + 1;
 
+  // check for overflow
   if ((e3 + 15) > 30)
   {
     return -1;
@@ -152,24 +164,27 @@ multVals(int source1, int source2) {
     return 0;
   }
 
+  // is the multiplication of the mantissa
   float frac = frac1 * frac2;
+
+  // if bigger than two must rejustify
   if (frac >= 2)
   {
     frac /= 2;
     ++e3;
   }
 
-  if (e3 > 14)
-  {
-    return -1;
-  }
-
+  // rebuild the biased exponent
   int new_exp = 15 + e3;
+
+  // get rid of the leading point since it is assumed
   frac -= 1;
   frac *= (float)pow(2, 7);
 
+  // truncate the float
   int newFrac = (int) frac;
 
+  // build the new number
   int retVal = 0;
   retVal |= new_exp;
   retVal <<=  7;
@@ -203,12 +218,14 @@ addVals(int source1, int source2) {
   frac1 = (frac1 / ((float)pow(2, 7))) + 1;
   frac2 = (frac2 / ((float)pow(2, 7))) + 1;
 
+  // check to see which exponent is better
   if (e1 > e2)
   {
     int i;
     int delta = e1 - e2;
     for (i = 0; i < delta; ++i)
     {
+      // justify frac 2
       frac2 = frac2 / 2;
       ++e2;
     }
@@ -219,30 +236,38 @@ addVals(int source1, int source2) {
     int delta = e2 - e1;
     for ( i = 0; i < delta; ++i)
     {
+      // justify frac1
       frac1 = frac1 / 2;
       ++e1;
     }
   }
 
+  // add the mantissas
   float frac = frac2 + frac1;
 
+  // if the fraction is greater than 2 justify frac down
+  // and increment the exponent.
   while (frac >= 2)
   {
     frac = frac / 2;
     ++e1;
   }
 
+  // if the fraction is less than 1 justify up
+  // decrement the exponent. 
   while (frac < 1)
   {
     frac = frac * 2;
     --e1;
   }
 
+  // check for overflow
   if ((e1 + 15) > 30)
   {
     return -1;
   }
  
+  // build the new number
   int new_exp = (15 + e1) * (pow(2, 7));
   frac -= 1;
   frac *= (float)pow(2, 7);

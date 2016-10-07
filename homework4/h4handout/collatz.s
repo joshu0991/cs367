@@ -2,7 +2,7 @@
 .global collatz
 	.type   collatz,@function
 collatz:
-	movq $0, %rax
+	movq $1, %rax
 	movq $1, %rbx           # cache one for easy anding to check if number is even.
 .L1:
 	cmpq $1, %rdi           # compare toe see if the value is 1

@@ -2,6 +2,7 @@
 .global collatz
 	.type   collatz,@function
 collatz:
+	push %rbx		# rbx is non-volitile must cache the value to preserve it.
 	movq $1, %rax
 	movq $1, %rbx           # cache one for easy anding to check if number is even.
 .L1:
@@ -22,6 +23,7 @@ collatz:
 	movq $1, %rbx		# set rbx back to one so we can use it to and again.
 	jmp .L1			# go back to the beginning to see if the value is 1
 .L4:
+	pop %rbx
 	ret
 	# END YOUR CODE
 	

@@ -3,6 +3,7 @@
 	.type   sum_primes,@function
 
 sum_primes: # rdi has the length of the array and rsi has a pointer to the front of the long array
+	push %rbx		# callee register must restore state...
 	movq $0, %rax		# this will be the return sum of our primes
 	movq $0, %rbx		# this will be a counter to ensure we don't read past the length
 
@@ -20,6 +21,7 @@ sum_primes: # rdi has the length of the array and rsi has a pointer to the front
 	je .L3			# the value is a prime add it
 	jmp .L4			# otherwwise check to see if we wish to continue and update as such
 .L2:
+	pop %rbx		# Restore rbx to it's initial value
 	ret
 .L3:
 	pop %rax		# get back our counter

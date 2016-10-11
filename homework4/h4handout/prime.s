@@ -2,6 +2,7 @@
 .global prime
 	.type   prime,@function
 prime:
+	push %rbx		# rbx is non-volitile and must be saved as to not modify it.
 	movq $2, %rbx		# rbx is a variable we will increment everytime through the loop
 				# and use to divide by.
 	cmpq $1, %rdi           # deal with the ones case since 1 is not a prime
@@ -21,9 +22,11 @@ prime:
 	jmp .L1
 .L2:	
 	movq $0, %rax		# we found a number that divides n return zero
+	pop %rbx		#restore rbx to the value it was before this function
 	ret
 .L3:
 	movq $1, %rax		# we have a prime number so return one
+	pop %rbx		# restore rbx to its origional value
 	ret
 	# END YOUR CODE
 	

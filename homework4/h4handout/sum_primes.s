@@ -11,7 +11,6 @@ sum_primes: # rdi has the length of the array and rsi has a pointer to the front
 	je .L2
 .L1:
 	movq (%rsi), %rcx	# move what our pointer points to rcx
-	push %rbx		# save the counter
 	push %rdi		# save the size
 	push %rsi		# put our pointer on the stack we need this reg to pass our value
 	push %rax		# put rax on the stack as well we need this for the return value
@@ -27,7 +26,6 @@ sum_primes: # rdi has the length of the array and rsi has a pointer to the front
 	pop %rax		# get back our counter
 	pop %rsi		# get back our pointer
 	pop %rdi		# get back the size
-	pop %rbx		# get abck the counter
 	addq %rcx, %rax		# rax = rax + rcx since this was prime
 	incq %rbx		# increment our counter
 	addq $8, %rsi		# move the pointer to the next location
@@ -38,7 +36,6 @@ sum_primes: # rdi has the length of the array and rsi has a pointer to the front
 	pop %rax		# get out counter back
 	pop %rsi		# get our pointer back
 	pop %rdi		# get back the size
-	pop %rbx		# get back the counter
 	incq %rbx		# increment our counter
 	addq $8, %rsi		# move our pointer to the next location
 	cmpq %rdi, %rbx		# compate to see if we are reading past the end of the array
